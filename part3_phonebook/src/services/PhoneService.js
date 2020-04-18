@@ -7,6 +7,7 @@ const getAll = (text) =>(
     axios
     .get(baseURL)
     .then(response => {
+        console.log(response.data)
         if (text !==''){
             const filteredObj = response.data.filter(person => person.name.includes(text))
             return (filteredObj)
@@ -21,7 +22,10 @@ const addPerson = (person) => (
     axios
     .post(baseURL,person)
     .then(response => {
-        return (response.data)
+        return (response)
+    })
+    .catch(error => {
+        return error.response
     })
 )
 
@@ -29,6 +33,9 @@ const EditPerson = (person) =>(
     axios
     .put(`${baseURL}/${person.id}`,person)
     .then(response => (response))
+    .catch(error => {
+        return error.response
+    })
 )
 
 

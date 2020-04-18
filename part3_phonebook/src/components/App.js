@@ -7,20 +7,22 @@ import Notification from './Notification'
 
 
 const App = () => {
+  const [ newSearch, setSearch] = useState('')
   const [ persons, setPersons] = useState([]) 
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber] = useState('')
-  const [ newSearch, setSearch] = useState('')
   const [ msg, setMsg] = useState(null)
 
+  
   useEffect(() => {
     PhoneService
     .getAll(newSearch)
     .then(Persons => {
+      console.log(Persons)
       setPersons(Persons)
     })
-  })
-
+  },[newSearch])
+  
 
   const addName =(event) => {
     event.preventDefault()
@@ -34,14 +36,20 @@ const App = () => {
           PhoneService
           .addPerson(personObj)
           .then(response => {
-            setPersons(persons.concat(response))
-            setNewName('')
-            setNewNumber('')
-            setMsg(`Added ${newName}`)
+            if (response.status !== 200){
+              setMsg(`${response.data.error}`)
+            } else{
+              setPersons(persons.concat(response.data))
+              setNewName('')
+              setNewNumber('')
+              setMsg(`Added ${newName}`)
+            }
             setTimeout(() => {
               setMsg(null)
             }, 5000)
+            
           })
+
         } else{
           const result = window.confirm(`${newName} is already added to phonebook, replace the old number with new one?`)
           if (result) {
@@ -50,16 +58,19 @@ const App = () => {
             PhoneService
             .EditPerson(personObj)
             .then(response => {
+              if (response.status !== 200){
+                setMsg(`${response.data.error}`)
+              } else{
               setPersons(persons.map(p => p.id !== person.id ? p : personObj))
               setNewName('')
               setNewNumber('')
               setMsg(`Updated ${newName} number`)
               setTimeout(() => {
                 setMsg(null)
-            }, 5000)
+            }, 5000)}
             })
             .catch( error => {
-              setMsg(`The person ${newName} was already deleted from server`)
+              setMsg(error)
               setTimeout(() => {
                 setMsg(null)
             }, 5000)
